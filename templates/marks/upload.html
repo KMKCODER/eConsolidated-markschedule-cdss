@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Marks - {{ class_info.name }} - eConsolidated Mark Schedule{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-6 text-primary">
+                    <i class="bi bi-upload"></i> Upload Marks
+                </h1>
+                <p class="lead">{{ class_info.name }} - {{ learners|length }} learner(s)</p>
+            </div>
+            <a href="{{ url_for('view_class', class_id=class_info.id) }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Class
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if learners %}
+<div class="card shadow">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-journal-text"></i> Mark Entry Form
+        </h5>
+        <small>Test 1: 0-40 marks | Test 2: 0-60 marks | Total: 100 marks</small>
+    </div>
+    
+    <form method="POST" action="{{ url_for('upload_marks', class_id=class_info.id) }}">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Learner Name</th>
+                            <th>Gender</th>
+                            <th>Test 1 Mark<br><small class="text-muted">(Max: 40)</small></th>
+                            <th>Test 2 Mark<br><small class="text-muted">(Max: 60)</small></th>
+                            <th>Current Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for learner in learners %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                <strong>{{ learner.name }}</strong>
+                            </td>
+                            <td>
+                                {% if learner.gender == 'male' %}
+                                    <span class="badge bg-primary">Male</span>
+                                {% else %}
+                                    <span class="badge bg-info">Female</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <input type="number" 
+                                       class="form-control" 
+                                       name="test1_{{ learner.id }}" 
+                                       value="{{ learner.test1_mark if learner.test1_mark is not none else '' }}"
+                                       min="0" 
+                                       max="40" 
+                                       placeholder="0-40">
+                            </td>
+                            <td>
+                                <input type="number" 
+                                       class="form-control" 
+                                       name="test2_{{ learner.id }}" 
+                                       value="{{ learner.test2_mark if learner.test2_mark is not none else '' }}"
+                                       min="0" 
+                                       max="60" 
+                                       placeholder="0-60">
+                            </td>
+                            <td>
+                                {% if learner.final_mark is not none %}
+                                    <strong class="text-{% if learner.final_mark >= 50 %}success{% else %}danger{% endif %}">
+                                        {{ learner.final_mark }}/100
+                                    </strong>
+                                {% else %}
+                                    <span class="text-muted">Not calculated</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if learner.test1_mark is not none and learner.test2_mark is not none %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Complete
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning">
+                                        <i class="bi bi-clock"></i> Pending
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="alert alert-info mt-3">
+                <h6 class="alert-heading">
+                    <i class="bi bi-info-circle"></i> Flexible Mark Entry
+                </h6>
+                <ul class="mb-0">
+                    <li><strong>Test 1:</strong> Enter marks between 0 and 40 (optional)</li>
+                    <li><strong>Test 2:</strong> Enter marks between 0 and 60 (optional)</li>
+                    <li><strong>Partial Entry Allowed:</strong> You can enter just Test 1 marks now and Test 2 marks later</li>
+                    <li><strong>Final Mark:</strong> Automatically calculated only when both marks are available</li>
+                    <li>You can update existing marks by entering new values</li>
+                    <li>Leave fields empty to keep existing marks unchanged</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card-footer">
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-upload"></i> Upload Marks
+                </button>
+                <button type="reset" class="btn btn-secondary">
+                    <i class="bi bi-arrow-clockwise"></i> Reset Form
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-people text-muted" style="font-size: 4rem;"></i>
+                <h3 class="text-muted mt-3">No Learners in This Class</h3>
+                <p class="text-muted">
+                    You need to add learners before uploading marks.
+                    {% if session.role == 'admin' %}
+                        <br><a href="{{ url_for('add_learner', class_id=class_info.id) }}" class="btn btn-success mt-2">
+                            <i class="bi bi-person-plus"></i> Add Learners
+                        </a>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-calculate totals as user types (for preview)
+document.querySelectorAll('input[type="number"]').forEach(input => {
+    input.addEventListener('input', function() {
+        const row = this.closest('tr');
+        const test1Input = row.querySelector('input[name*="test1_"]');
+        const test2Input = row.querySelector('input[name*="test2_"]');
+        
+        const test1 = parseInt(test1Input.value) || 0;
+        const test2 = parseInt(test2Input.value) || 0;
+        
+        if (test1 > 0 && test2 > 0) {
+            const total = test1 + test2;
+            console.log(`Preview total for row: ${total}`);
+        }
+    });
+});
+</script>
+{% endblock %}

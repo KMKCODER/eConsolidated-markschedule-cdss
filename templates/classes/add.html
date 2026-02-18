@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Add Class - eConsolidated Mark Schedule{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-plus-circle"></i> Add New Class
+                </h4>
+            </div>
+            
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('add_class') }}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">
+                            <i class="bi bi-folder"></i> Class Name *
+                        </label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               required autofocus placeholder="Enter class name (e.g., Grade 10A, Form 2B)">
+                        <small class="form-text text-muted">Class name must be unique</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">
+                            <i class="bi bi-text-paragraph"></i> Description
+                        </label>
+                        <textarea class="form-control" id="description" name="description" 
+                                  rows="3" placeholder="Enter a brief description of this class (optional)"></textarea>
+                        <small class="form-text text-muted">Optional: Add details like subject, semester, etc.</small>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Add Class
+                        </button>
+                        <a href="{{ url_for('list_classes') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Classes
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="mt-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="bi bi-info-circle"></i> What happens after creating a class?
+                    </h6>
+                    <ul class="mb-0">
+                        <li>You can add learners to this class</li>
+                        <li>Teachers can upload marks for the learners</li>
+                        <li>Generate reports and view class performance</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

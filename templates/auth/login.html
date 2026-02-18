@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Login - eConsolidated Mark Schedule{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i class="bi bi-journal-text text-primary" style="font-size: 3rem;"></i>
+                    <h3 class="card-title">eConsolidated Mark Schedule</h3>
+                    <p class="text-muted">Please sign in to your account</p>
+                </div>
+                
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="bi bi-person"></i> Username
+                        </label>
+                        <input type="text" class="form-control" id="username" name="username" 
+                               required autofocus placeholder="Enter your username">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="bi bi-lock"></i> Password
+                        </label>
+                        <input type="password" class="form-control" id="password" name="password" 
+                               required placeholder="Enter your password">
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right"></i> Sign In
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="text-center mt-3">
+            <small class="text-muted">
+                <strong>Default login:</strong> admin / admin123<br>
+                Contact your administrator for access
+            </small>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .card-body {
+        padding: 2rem;
+    }
+    
+    footer {
+        margin-top: 0 !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: white;
+    }
+</style>
+{% endblock %}

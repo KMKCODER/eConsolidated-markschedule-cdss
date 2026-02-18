@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Register User - eConsolidated Mark Schedule{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-person-plus"></i> Register New User
+                </h4>
+            </div>
+            
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('register') }}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">
+                                    <i class="bi bi-person"></i> Username *
+                                </label>
+                                <input type="text" class="form-control" id="username" name="username" 
+                                       required autofocus placeholder="Enter username">
+                                <small class="form-text text-muted">Username must be unique</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="role" class="form-label">
+                                    <i class="bi bi-shield"></i> Role *
+                                </label>
+                                <select class="form-select" id="role" name="role" required>
+                                    <option value="">Select role</option>
+                                    <option value="teacher">Teacher</option>
+                                    <option value="admin">Administrator</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="bi bi-lock"></i> Password *
+                                </label>
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       required minlength="6" placeholder="Enter password">
+                                <small class="form-text text-muted">At least 6 characters</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="confirm_password" class="form-label">
+                                    <i class="bi bi-lock-fill"></i> Confirm Password *
+                                </label>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                                       required minlength="6" placeholder="Confirm password">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-person-plus"></i> Register User
+                                </button>
+                                <a href="{{ url_for('manage_users') }}" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to Users
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = this.value;
+    
+    if (password !== confirmPassword) {
+        this.setCustomValidity('Passwords do not match');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+</script>
+{% endblock %}

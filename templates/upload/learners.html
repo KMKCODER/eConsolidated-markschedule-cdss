@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Learners CSV - eConsolidated Mark Schedule{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="display-6 text-primary">
+                <i class="bi bi-upload"></i> Upload Learners (CSV)
+            </h1>
+            <a href="{{ url_for('list_classes') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Classes
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- CSV Format Instructions -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card bg-info text-white">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle"></i> CSV Format Required
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Your CSV file must have these columns (in any order):</strong></p>
+                <ul class="mb-3">
+                    <li><strong>name</strong> - Full name of the learner</li>
+                    <li><strong>gender</strong> - Must be "male" or "female"</li>
+                    <li><strong>class_name</strong> - Exact name of an existing class</li>
+                </ul>
+                
+                <h6>Example CSV content:</h6>
+                <div class="bg-light text-dark p-3 rounded">
+                    <code>
+                        name,gender,class_name<br>
+                        John Smith,male,Grade 10A<br>
+                        Jane Doe,female,Grade 10A<br>
+                        Mary Johnson,female,Grade 10B
+                    </code>
+                </div>
+                
+                <div class="mt-3">
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="downloadLearnerCSVTemplate()">
+                        <i class="bi bi-download"></i> Download Template
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">
+                    <i class="bi bi-check2-square"></i> Available Classes
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if classes %}
+                    <ul class="list-unstyled mb-0">
+                        {% for class_data in classes %}
+                            <li class="mb-1">
+                                <span class="badge bg-primary">{{ class_data.name }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted mb-0">No classes available. Create classes first.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Form -->
+{% if classes %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-cloud-upload"></i> Upload CSV File
+                </h5>
+            </div>
+            
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_learners_csv') }}">
+                    <div class="mb-4">
+                        <label for="csv_file" class="form-label">
+                            <i class="bi bi-file-earmark-text"></i> Select CSV File *
+                        </label>
+                        <input type="file" class="form-control" id="csv_file" name="csv_file" 
+                               accept=".csv" required>
+                        <small class="form-text text-muted">
+                            Choose a CSV file containing learner information
+                        </small>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-exclamation-triangle"></i> Important Notes
+                        </h6>
+                        <ul class="mb-0">
+                            <li>Classes must exist before uploading learners</li>
+                            <li>Duplicate learners in the same class will be skipped</li>
+                            <li>Invalid data will be reported after upload</li>
+                            <li>Gender must be exactly "male" or "female" (case insensitive)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-upload"></i> Upload Learners
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="bi bi-arrow-clockwise"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="bi bi-lightbulb"></i> Tips
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Use Excel or Google Sheets to create your CSV</li>
+                    <li>Save as "CSV (Comma delimited)" format</li>
+                    <li>Test with a small file first</li>
+                    <li>Ensure class names match exactly</li>
+                    <li>Check for typos in gender column</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-warning">
+            <h5 class="alert-heading">
+                <i class="bi bi-exclamation-triangle"></i> No Classes Available
+            </h5>
+            <p class="mb-2">You need to create classes before uploading learners.</p>
+            <a href="{{ url_for('add_class') }}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Create Your First Class
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

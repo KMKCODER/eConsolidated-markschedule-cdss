@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - eConsolidated Mark Schedule{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-6 text-primary">
+            <i class="bi bi-house"></i> Dashboard
+        </h1>
+        <p class="lead">Welcome to the eConsolidated Mark Schedule system, {{ session.username }}!</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="mb-0">{{ total_classes }}</h3>
+                        <p class="mb-0">Total Classes</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-collection" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="mb-0">{{ total_learners }}</h3>
+                        <p class="mb-0">Total Learners</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-people" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="mb-0">{{ total_marks }}</h3>
+                        <p class="mb-0">Marks Recorded</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-journal-check" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning"></i> Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('list_classes') }}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-collection"></i> View Classes
+                        </a>
+                    </div>
+                    {% if session.role == 'admin' %}
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('add_class') }}" class="btn btn-outline-success w-100">
+                            <i class="bi bi-plus-circle"></i> Add Class
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('upload_learners_csv') }}" class="btn btn-outline-info w-100">
+                            <i class="bi bi-upload"></i> Upload Learners
+                        </a>
+                    </div>
+                    {% endif %}
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('upload_marks_csv') }}" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-upload"></i> Upload Marks
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('reports') }}" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-bar-chart"></i> View Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Classes -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> Recent Classes
+                </h5>
+                <a href="{{ url_for('list_classes') }}" class="btn btn-sm btn-outline-primary">
+                    View All Classes
+                </a>
+            </div>
+            
+            <div class="card-body">
+                {% if recent_classes %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Class Name</th>
+                                    <th>Description</th>
+                                    <th>Learners</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for class_data in recent_classes %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ class_data.name }}</strong>
+                                    </td>
+                                    <td>{{ class_data.description or 'No description' }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ class_data.learner_count }} learners</span>
+                                    </td>
+                                    <td>{{ class_data.created_at.split(' ')[0] if class_data.created_at else 'N/A' }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('view_class', class_id=class_data.id) }}" 
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                            <a href="{{ url_for('upload_marks', class_id=class_data.id) }}" 
+                                               class="btn btn-outline-success btn-sm">
+                                                <i class="bi bi-upload"></i> Marks
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                        <h5 class="text-muted mt-2">No Classes Yet</h5>
+                        <p class="text-muted">
+                            {% if session.role == 'admin' %}
+                                <a href="{{ url_for('add_class') }}">Create your first class</a> to get started.
+                            {% else %}
+                                Ask your administrator to create classes.
+                            {% endif %}
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

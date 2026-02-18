@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Marks CSV - eConsolidated Mark Schedule{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="display-6 text-primary">
+                <i class="bi bi-upload"></i> Upload Marks (CSV)
+            </h1>
+            <a href="{{ url_for('reports') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Reports
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- CSV Format Instructions -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card bg-success text-white">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle"></i> CSV Format Required
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Your CSV file must have these columns (in any order):</strong></p>
+                <ul class="mb-3">
+                    <li><strong>learner_name</strong> - Full name of the learner (must exist)</li>
+                    <li><strong>test1_mark</strong> - Test 1 mark (0-40)</li>
+                    <li><strong>test2_mark</strong> - Test 2 mark (0-60)</li>
+                    <li><strong>class_name</strong> - Exact name of the learner's class</li>
+                </ul>
+                
+                <h6>Example CSV content:</h6>
+                <div class="bg-light text-dark p-3 rounded">
+                    <code>
+                        learner_name,test1_mark,test2_mark,class_name<br>
+                        John Smith,35,,Grade 10A<br>
+                        Jane Doe,,52,Grade 10A<br>
+                        Mary Johnson,32,48,Grade 10B
+                    </code>
+                </div>
+                
+                <div class="mt-3">
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="downloadMarksCSVTemplate()">
+                        <i class="bi bi-download"></i> Download Template
+                    </button>
+                </div>
+                
+                <div class="mt-3 p-2 bg-warning text-dark rounded">
+                    <strong>Flexible Upload:</strong> You can upload Test 1 and Test 2 marks separately. Leave columns empty for marks you're not uploading yet.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="bi bi-calculator"></i> Mark Ranges
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="badge bg-primary p-2 mb-2">
+                            <i class="bi bi-1-circle"></i>
+                        </div>
+                        <div>
+                            <strong>Test 1</strong><br>
+                            <span class="text-muted">0-40 marks</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="badge bg-secondary p-2 mb-2">
+                            <i class="bi bi-2-circle"></i>
+                        </div>
+                        <div>
+                            <strong>Test 2</strong><br>
+                            <span class="text-muted">0-60 marks</span>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <div class="badge bg-success p-2 mb-2">
+                        <i class="bi bi-plus"></i>
+                    </div>
+                    <div>
+                        <strong>Total</strong><br>
+                        <span class="text-muted">0-100 marks</span><br>
+                        <small class="text-muted">Auto-calculated</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="bi bi-check2-square"></i> Available Classes
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if classes %}
+                    <ul class="list-unstyled mb-0">
+                        {% for class_data in classes %}
+                            <li class="mb-1">
+                                <span class="badge bg-primary">{{ class_data.name }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted mb-0">No classes available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Form -->
+{% if classes %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-cloud-upload"></i> Upload Marks CSV File
+                </h5>
+            </div>
+            
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_marks_csv') }}">
+                    <div class="mb-4">
+                        <label for="csv_file" class="form-label">
+                            <i class="bi bi-file-earmark-text"></i> Select CSV File *
+                        </label>
+                        <input type="file" class="form-control" id="csv_file" name="csv_file" 
+                               accept=".csv" required>
+                        <small class="form-text text-muted">
+                            Choose a CSV file containing marks for learners
+                        </small>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-info-circle"></i> Upload Requirements
+                        </h6>
+                        <ul class="mb-0">
+                            <li>Learners must already exist in the system</li>
+                            <li><strong>Flexible Upload:</strong> You can upload just Test 1 marks, just Test 2 marks, or both</li>
+                            <li>Test 1 marks: 0-40 (leave empty if not uploading)</li>
+                            <li>Test 2 marks: 0-60 (leave empty if not uploading)</li>
+                            <li>Final marks are automatically calculated when both Test 1 and Test 2 are available</li>
+                            <li>Existing marks will be updated or merged with new marks</li>
+                            <li>At least one mark (Test 1 or Test 2) is required per row</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-upload"></i> Upload Marks
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="bi bi-arrow-clockwise"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="bi bi-lightbulb"></i> Tips for Success
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Ensure learner names match exactly as entered in the system</li>
+                    <li>Double-check mark ranges (Test 1: 0-40, Test 2: 0-60)</li>
+                    <li>Class names must match existing classes exactly</li>
+                    <li>Use whole numbers for marks (no decimals)</li>
+                    <li>Test with a small sample file first</li>
+                </ul>
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <strong>Note:</strong> Existing marks will be updated if learner already has records.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-warning">
+            <h5 class="alert-heading">
+                <i class="bi bi-exclamation-triangle"></i> No Classes Available
+            </h5>
+            <p class="mb-2">You need to create classes and add learners before uploading marks.</p>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('add_class') }}" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> Create Class
+                </a>
+                <a href="{{ url_for('upload_learners_csv') }}" class="btn btn-info">
+                    <i class="bi bi-people"></i> Upload Learners
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

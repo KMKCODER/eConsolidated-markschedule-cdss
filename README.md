@@ -223,5 +223,3 @@ For support and questions:
   - Responsive web interface
 
 ---
-
-**Built with ❤️ for educational excellence**
